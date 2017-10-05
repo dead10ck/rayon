@@ -8,6 +8,7 @@ use super::IndexedParallelIterator;
 
 use std::cmp;
 use std::usize;
+use thread_id;
 
 pub trait ProducerCallback<T> {
     type Output;
@@ -147,8 +148,7 @@ impl Splitter {
     fn thief_id() -> usize {
         // The actual `ID` value is irrelevant.  We're just using its TLS
         // address as a unique thread key, faster than a real thread-id call.
-        thread_local!{ static ID: bool = false }
-        ID.with(|id| id as *const bool as usize)
+        thread_id::get()
     }
 
     #[inline]

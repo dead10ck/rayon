@@ -103,6 +103,7 @@
 
 extern crate rayon_core;
 extern crate either;
+extern crate thread_id;
 
 #[cfg(test)]
 extern crate rand;
