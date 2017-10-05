@@ -8,6 +8,7 @@ use super::IndexedParallelIterator;
 
 use std::cmp;
 use std::usize;
+use std::thread;
 
 pub trait ProducerCallback<T> {
     type Output;
@@ -134,7 +135,7 @@ pub trait UnindexedProducer: Send + Sized {
 struct Splitter {
     /// The `origin` tracks the ID of the thread that started this job,
     /// so we can tell when we've been stolen to a new thread.
-    origin: usize,
+    origin: thread::ThreadId,
 
     /// The `splits` tell us approximately how many remaining times we'd
     /// like to split this job.  We always just divide it by two though, so
@@ -144,11 +145,10 @@ struct Splitter {
 
 impl Splitter {
     #[inline]
-    fn thief_id() -> usize {
+    fn thief_id() -> thread::ThreadId {
         // The actual `ID` value is irrelevant.  We're just using its TLS
         // address as a unique thread key, faster than a real thread-id call.
-        thread_local!{ static ID: bool = false }
-        ID.with(|id| id as *const bool as usize)
+        thread::current().id()
     }
 
     #[inline]
